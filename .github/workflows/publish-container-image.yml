@@ -1,0 +1,33 @@
+name: Build and Push Tagged Game
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers on v1, v1.0, v2.0-beta, etc.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.actor }}/javascript-tetris-unprivileged:${{ github.ref_name }}
+            ghcr.io/${{ github.actor }}/javascript-tetris-unprivileged:latest
